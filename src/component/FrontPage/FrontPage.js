@@ -38,9 +38,8 @@ const FrontPage = () => {
 
   useEffect(() => {
     async function checkNFTOwnership() {
-      // Ensure window is defined (i.e., code is running on client)
-  if (typeof window !== 'undefined') {
-    const web3 = new Web3(window.ethereum);
+      if (typeof window !== 'undefined') {
+        const web3 = new Web3(window.ethereum);
         try {
           await window.ethereum.enable();
           const accounts = await web3.eth.getAccounts();
@@ -52,16 +51,10 @@ const FrontPage = () => {
           );
 
           const balance = await nftContract.methods
-    .balanceOf(currentAccount)
-    .call();
+            .balanceOf(currentAccount)
+            .call();
 
-    if (web3.utils.toBN(balance).isZero()) {
-      setOwnsNFT(false);
-  } else {
-      setOwnsNFT(true);
-  }
-  
-  
+          setOwnsNFT(balance !== '0');
         } catch (error) {
           console.error(error);
         }
@@ -70,6 +63,9 @@ const FrontPage = () => {
 
     checkNFTOwnership();
   }, []);
+
+
+
 
   const fontSize = useMemo(() => {
     if (windowWidth < 480) {
