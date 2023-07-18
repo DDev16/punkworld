@@ -6,7 +6,7 @@ import '../../component/FrontPage/FrontPage.css';
 import { getCurrentYear } from '../../component/utils/date.js';
 import '../../Assets/fonts.css';
 import {MyNFT} from '../../abi/MyNFT.js';
-
+import Web3 from "web3";
 const Navigation = lazy(() => import('../../component/NAV/NavBar.js'));
 
 const transitionOptions = { delay: 0.2, type: 'spring', stiffness: 120 };
@@ -21,6 +21,30 @@ const AnimatedText = ({ initial, animate, transition, text, style }) => (
 const FrontPage = () => {
   const year = useMemo(() => getCurrentYear(), []);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [loadingNFT, setLoadingNFT] = useState(true);
+  const [ownsNFT, setOwnsNFT] = useState(false);
+
+  const checkNFTOwnership = async () => {
+    if (window.ethereum) {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable(); // Request user's account
+        const accounts = await web3.eth.getAccounts();
+        const myNFTInstance = new web3.eth.Contract(MyNFT, CONTRACT_ADDRESS);
+        // You may need to adjust this depending on your NFT contract
+        const balance = await myNFTInstance.methods.balanceOf(accounts[0]).call();
+        
+        // Convert balance to BigInt and then compare it with BigInt(0)
+        setOwnsNFT(BigInt(balance.toString()) > BigInt(0));
+      } catch (error) {
+        console.error("Error checking NFT ownership: ", error);
+      }
+    } else {
+      console.log("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
+    }
+  
+    setLoadingNFT(false);
+  };
 
   useEffect(() => {
     const handleWindowResize = () => {
@@ -28,6 +52,8 @@ const FrontPage = () => {
     };
 
     window.addEventListener('resize', handleWindowResize);
+
+    checkNFTOwnership();  // Call the function
 
     return () => {
       window.removeEventListener('resize', handleWindowResize);
@@ -130,7 +156,7 @@ const FrontPage = () => {
           text="Experience an immersive 3D world inspired by the whimsical charm of Dr. Seuss and the power of blockchain Punks. Navigate through our fantastic landscapes, find Easter eggs hidden around,  interact with our unique assets, and step into a world beyond the ordinary."
         />
 
-        <Link to={"/seussworld"}>
+<Link to={ownsNFT ? "/seussworld" : "#"}>
           <motion.button
             className="enter-button"
             whileHover={{ scale: 1.1, rotate: [0, 360] }}
@@ -138,8 +164,9 @@ const FrontPage = () => {
             aria-label="Enter SeussWorld"
             title="You need an NFT to enter the world"
             style={{ fontFamily: 'SeussFont', fontSize: '20px' }}
+            disabled={!ownsNFT || loadingNFT}
           >
-            Enter SeussWorld
+            {loadingNFT ? 'Checking NFT...' : ownsNFT ? 'Enter SeussWorld' : 'You need an NFT to enter'}
           </motion.button>
         </Link>
       </motion.main>
