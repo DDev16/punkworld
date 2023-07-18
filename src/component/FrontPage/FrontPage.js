@@ -35,7 +35,7 @@ const FrontPage = () => {
         const balance = await myNFTInstance.methods.balanceOf(accounts[0]).call();
         
         // Convert balance to BigInt and then compare it with BigInt(0)
-        setOwnsNFT(BigInt(balance.toString()) > BigInt(0));
+        setOwnsNFT(balance.toString() > '0');
       } catch (error) {
         console.error("Error checking NFT ownership: ", error);
       }
