@@ -1,16 +1,25 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:react/recommended"
-    ],
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
-        "ecmaVersion": 12,
-        "sourceType": "module"
+      "requireConfigFile": false,
+      "babelOptions": {
+        "presets": ["@babel/preset-react"]
+      }
     },
-    "rules": {
+    "plugins": [
+      "react"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended"
+    ],
+    "settings": {
+      "react": {
+        "version": "detect",
+        "pragma": "React",
+        "pragmaFrag": "React.Fragment",
+        "throwOnNamespace": true
+      }
     }
-}
+  }
+  
