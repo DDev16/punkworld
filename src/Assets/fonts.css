@@ -1,0 +1,7 @@
+@font-face {
+    font-family: 'SeussFont';
+    src: url('../Assets/Seuss-G4Ra.ttf') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
