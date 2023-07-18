@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import '../../component/FrontPage/FrontPage.css';
 import { getCurrentYear } from '../../component/utils/date.js';
 import '../../Assets/fonts.css';
-import Web3 from 'web3';
 import {MyNFT} from '../../abi/MyNFT.js';
 
 const Navigation = lazy(() => import('../../component/NAV/NavBar.js'));
@@ -22,7 +21,6 @@ const AnimatedText = ({ initial, animate, transition, text, style }) => (
 const FrontPage = () => {
   const year = useMemo(() => getCurrentYear(), []);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [ownsNFT, setOwnsNFT] = useState(false);
 
   useEffect(() => {
     const handleWindowResize = () => {
@@ -36,33 +34,6 @@ const FrontPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    async function checkNFTOwnership() {
-      if (typeof window !== 'undefined') {
-        const web3 = new Web3(window.ethereum);
-        try {
-          await window.ethereum.enable();
-          const accounts = await web3.eth.getAccounts();
-          const currentAccount = accounts[0];
-
-          const nftContract = new web3.eth.Contract(
-            MyNFT,
-            CONTRACT_ADDRESS
-          );
-
-          const balance = await nftContract.methods
-            .balanceOf(currentAccount)
-            .call();
-
-          setOwnsNFT(balance !== '0');
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    }
-
-    checkNFTOwnership();
-  }, []);
 
 
 
@@ -158,15 +129,9 @@ const FrontPage = () => {
           }}
           text="Experience an immersive 3D world inspired by the whimsical charm of Dr. Seuss and the power of blockchain Punks. Navigate through our fantastic landscapes, find Easter eggs hidden around,  interact with our unique assets, and step into a world beyond the ordinary."
         />
-{!ownsNFT && (
-  <p style={{ color: 'red', textAlign: 'center', marginTop: '20px' }}>
-    You do not own an NFT! Please purchase one to enter SeussWorld.
-  </p>
-)}
 
-        <Link to={ownsNFT ? "/seussworld" : "/"}>
+        <Link to={"/seussworld"}>
           <motion.button
-            disabled={!ownsNFT}
             className="enter-button"
             whileHover={{ scale: 1.1, rotate: [0, 360] }}
             whileTap={{ scale: 0.9 }}
