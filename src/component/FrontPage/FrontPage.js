@@ -38,8 +38,9 @@ const FrontPage = () => {
 
   useEffect(() => {
     async function checkNFTOwnership() {
-      if (window.ethereum) {
-        const web3 = new Web3(window.ethereum);
+      // Ensure window is defined (i.e., code is running on client)
+  if (typeof window !== 'undefined') {
+    const web3 = new Web3(window.ethereum);
         try {
           await window.ethereum.enable();
           const accounts = await web3.eth.getAccounts();
