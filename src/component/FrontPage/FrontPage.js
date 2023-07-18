@@ -52,12 +52,13 @@ const FrontPage = () => {
           );
 
           const balance = await nftContract.methods
-            .balanceOf(currentAccount)
-            .call();
+    .balanceOf(currentAccount)
+    .call();
 
-          if (balance > 0) {
-            setOwnsNFT(true);
-          }
+if (Number(balance.toString()) > 0) {
+    setOwnsNFT(true);
+}
+
         } catch (error) {
           console.error(error);
         }
