@@ -55,10 +55,13 @@ const FrontPage = () => {
     .balanceOf(currentAccount)
     .call();
 
-if (Number(balance.toString()) > 0) {
-    setOwnsNFT(true);
-}
-
+    if (web3.utils.toBN(balance).isZero()) {
+      setOwnsNFT(false);
+  } else {
+      setOwnsNFT(true);
+  }
+  
+  
         } catch (error) {
           console.error(error);
         }
