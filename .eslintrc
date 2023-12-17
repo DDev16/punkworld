@@ -1,25 +1,47 @@
 {
-    "parser": "@babel/eslint-parser",
-    "parserOptions": {
-      "requireConfigFile": false,
-      "ecmaVersion": 2020,
-      "babelOptions": {
-        "presets": ["@babel/preset-react"]
-      }
-    },
-    "plugins": [
-      "react"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:react/recommended"
-    ],
-    "settings": {
-      "react": {
-        "version": "detect",
-        "pragma": "React",
-        "pragmaFrag": "React.Fragment",
-        "throwOnNamespace": true
-      }
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false,
+    "ecmaVersion": 2020,
+    "babelOptions": {
+      "presets": ["@babel/preset-react"]
     }
+  },
+  "plugins": ["react"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect",
+      "pragma": "React",
+      "pragmaFrag": "React.Fragment",
+      "throwOnNamespace": true
+    }
+  },
+  "rules": {
+    "react/jsx-props-no-spreading": "off",
+    "react/prop-types": "off",
+    "react/no-unknown-property": [
+      "error",
+      {
+        "ignore": [
+          "attachArray",
+          "luminanceThreshold",
+          "luminanceSmoothing",
+          "intensity",
+          "kernelSize",
+          "position",
+          "attachObject",
+          "count",
+          "array",
+          "itemSize",
+          "args"
+           
+        ]
+      }
+    ]
+    // Other rules...
+  }
 }

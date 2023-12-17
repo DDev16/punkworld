@@ -12,6 +12,8 @@ export const Player = () => {
   const { camera } = useThree();
 
   const mixer = useRef();
+  const [isDragging, setIsDragging] = useState(false);
+  const [cameraRotation, setCameraRotation] = useState({ x: 0, y: 0 });
 
   const forwardPress = useKeyPress('w');
   const backwardPress = useKeyPress('s');
@@ -36,12 +38,46 @@ export const Player = () => {
     });
   }, [gltf.animations]);
 
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (event) => {
+    if (!isDragging) return;
+
+    const { movementX, movementY } = event;
+    setCameraRotation((prevRotation) => ({
+      x: prevRotation.x + movementX * 0.002,
+      y: Math.min(Math.max(prevRotation.y - movementY * 0.002, -Math.PI / 4), Math.PI / 4),
+    }));
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [isDragging]);
+
   useFrame((_, delta) => {
-    const cameraOffset = new THREE.Vector3(0, 1, -8);
+    const cameraOffset = new THREE.Vector3(0, 2, -8);
     const modelPosition = model.current.position.clone();
-    modelPosition.y += 2; // Adjust the height of the camera above the model
-    camera.position.lerp(modelPosition.add(cameraOffset), 0.1);
-    camera.lookAt(model.current.position);
+    modelPosition.y += 2;
+
+    const cameraDirection = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraRotation.x);
+    const cameraPosition = modelPosition.clone().add(cameraOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraRotation.x));
+
+    camera.position.copy(cameraPosition);
+    camera.lookAt(modelPosition);
 
     if (mixer.current) mixer.current.update(delta);
 
@@ -71,38 +107,41 @@ export const Player = () => {
       setCurrentAction(newAction);
     }
 
-    let speed = shiftPress ? 0.2 : 0.1;
-
-    const cameraDirection = camera.getWorldDirection(new THREE.Vector3());
+    let speed = shiftPress ? 0.8 : 0.1;
     const cameraDirectionXZ = new THREE.Vector3(cameraDirection.x, 0, cameraDirection.z).normalize();
     const cameraPerpendicular = new THREE.Vector3(cameraDirection.z, 0, -cameraDirection.x).normalize();
 
     if (forwardPress) {
-        const newPos = model.current.position.clone().addScaledVector(cameraDirectionXZ, speed);
-        model.current.lookAt(newPos);
-        model.current.position.addScaledVector(cameraDirectionXZ, speed);
-      }
-      if (backwardPress) {
-        const newPos = model.current.position.clone().addScaledVector(cameraDirectionXZ, -speed);
-        model.current.lookAt(newPos);
-        model.current.position.addScaledVector(cameraDirectionXZ, -speed);
-      }
-      if (leftPress) {
-        const newPos = model.current.position.clone().addScaledVector(cameraPerpendicular, speed);
-        model.current.lookAt(newPos);
-        model.current.position.addScaledVector(cameraPerpendicular, speed);
-      }
-      if (rightPress) {
-        const newPos = model.current.position.clone().addScaledVector(cameraPerpendicular, -speed);
-        model.current.lookAt(newPos);
-        model.current.position.addScaledVector(cameraPerpendicular, -speed);
-      }
-      
+      const newPos = model.current.position.clone().addScaledVector(cameraDirectionXZ, -speed); // Flip the sign here
+      model.current.lookAt(newPos);
+      model.current.position.sub(cameraDirectionXZ.clone().multiplyScalar(speed)); // Subtract the movement vector
+    }
+    if (backwardPress) {
+      const newPos = model.current.position.clone().addScaledVector(cameraDirectionXZ, speed); // Flip the sign here
+      model.current.lookAt(newPos);
+      model.current.position.add(cameraDirectionXZ.clone().multiplyScalar(speed)); // Add the movement vector
+    }
+    if (leftPress) {
+      const newPos = model.current.position.clone().addScaledVector(cameraPerpendicular, -speed); // Flip the sign here
+      model.current.lookAt(newPos);
+      model.current.position.sub(cameraPerpendicular.clone().multiplyScalar(speed)); // Subtract the movement vector
+    }
+    if (rightPress) {
+      const newPos = model.current.position.clone().addScaledVector(cameraPerpendicular, speed); // Flip the sign here
+      model.current.lookAt(newPos);
+      model.current.position.add(cameraPerpendicular.clone().multiplyScalar(speed)); // Add the movement vector
+    }
+    
+
     model.current.position.y -= gravity;
     if (model.current.position.y <= groundY) {
       model.current.position.y = groundY;
     }
   });
 
-  return <primitive ref={model} object={gltf.scene} />;
+  
+
+/* eslint-disable react/no-unknown-property */
+
+return <primitive ref={model} object={gltf.scene} />;
 };

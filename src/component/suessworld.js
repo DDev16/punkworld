@@ -1,87 +1,103 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Box, OrbitControls, Plane, Stats } from '@react-three/drei';
-import { XR, useXR } from '@react-three/xr';
-import { Player } from './player';
-import SkyBox from '../component/SkyBox/SkyBox.js';
-import SkyBox1 from '../component/SkyBox/SkyBox1.js';
-import Sky1 from '../component/SkyBox/stars.jpg'
-import Sky from '../component/SkyBox/cartoon_step_into_a_dr_seuss-inspired_skybox_tri.jpg'
+import React, { useState, useEffect } from 'react';
+import { Canvas, extend, useThree, useFrame } from '@react-three/fiber';
+import { Box, OrbitControls, Plane } from '@react-three/drei';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass';
+import { Layers } from 'three';
+import TorusKnot from './Torus.js';
+import RainbowSphere from './Sphere copy.js';
+import Spherecustom from './Sphere.js';
+import SkyBox1 from './SkyBox/SkyBox1.js';
+import Sky1 from '../component/SkyBox/stars.jpg';
+import { Player } from './player.js';
+import LeePerrySmithModel from '../component/3D-models/Lerry.js';
+import Tvs from '../component/3D-models/Tvs.js';
+// Extend will make these available as JSX components
+extend({ EffectComposer, ShaderPass, RenderPass, UnrealBloomPass });
 
-const XRSetup = () => {
+// Layer for bloom effect
+const BLOOM_LAYER = new Layers(1);
 
-    const { setDefaultInput } = useXR();
-    const buttonRef = useRef(null);
+const PostProcessing = () => {
+  const { gl, scene, camera, size } = useThree();
+  const composer = new EffectComposer(gl);
+  const renderPass = new RenderPass(scene, camera);
+  const bloomPass = new UnrealBloomPass();
+  const fxaaPass = new ShaderPass(FXAAShader);
+  const smaaPass = new SMAAPass(size.width, size.height);
+
+  useEffect(() => {
+    // Render bloom layer
+    const bloomComposer = new EffectComposer(gl);
+    bloomComposer.renderToScreen = false;
+    bloomComposer.addPass(renderPass);
+    bloomComposer.addPass(bloomPass);
   
-    useEffect(() => {
-      const enterVR = () => {
-        if (buttonRef.current) {
-          buttonRef.current.hidden = true;
-          setDefaultInput(true);
-        }
-      };
+    // Render non-bloom layers
+    const finalComposer = new EffectComposer(gl);
+    finalComposer.addPass(renderPass);
+    finalComposer.addPass(fxaaPass);
+    finalComposer.addPass(smaaPass);
   
-      const exitVR = () => {
-        if (buttonRef.current) {
-          buttonRef.current.hidden = false;
-          setDefaultInput(false);
-        }
-      };
+    composer.addPass(renderPass);
   
-      const button = document.createElement('button');
-      button.innerText = 'Enter VR';
-      button.addEventListener('click', enterVR);
-      button.addEventListener('contextmenu', exitVR); // Add event listener for exiting VR
-      document.body.appendChild(button);
-      buttonRef.current = button;
+    return () => {
+      composer.dispose();
+      bloomComposer.dispose();
+      finalComposer.dispose();
+    };
+  }, [composer, renderPass, bloomPass, fxaaPass, smaaPass]);
   
-      return () => {
-        button.removeEventListener('click', enterVR);
-        button.removeEventListener('contextmenu', exitVR);
-        document.body.removeChild(button);
-      };
-    }, [setDefaultInput]);
-  
-    return null;
-  };
-  
+
+  useFrame(() => {
+    scene.traverse((obj) => {
+      if (obj.layers.test(BLOOM_LAYER)) {
+        obj.layers.enable(BLOOM_LAYER);
+      } else {
+        obj.layers.disable(BLOOM_LAYER);
+      }
+    });
+
+    composer.render();
+  }, 1);
+};
 
 const SeussWorld = () => {
-    const [orbitEnabled, setOrbitEnabled] = useState(true);
-    const testing = false;
+  const [orbitEnabled, setOrbitEnabled] = useState(true);
+  const playerPosition = { x: 0, z: 0 };
 
-    return (
-      <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
-        <Canvas style={{ width: '100%', height: '100%' }}>
-          <XR>
-          {testing ? <Stats /> : null}
-          {testing ? <axesHelper args={[2]} /> : null}
-          {testing ? <gridHelper args={[500, 500]} /> : null}
-            <ambientLight intensity={5} />
-            <pointLight position={[10, 10, 10]} />
-    
-            <Box position={[-1.2, 2, 0]} scale={[2,5,2]}>
-              <meshStandardMaterial color={'orange'} />
-            </Box>
-    
-            <Plane args={[500, 500]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-              <meshStandardMaterial color={'green'} />
-            </Plane>
-    
-           <SkyBox textureUrl={Sky} />  
-            <SkyBox1 textureUrl={Sky1} /> 
-            
-    
-            {/* OrbitControls allows the user to look around using the mouse */}
-            <OrbitControls enablePan={false} enableZoom={true} enabled={orbitEnabled} />
-            <Player firstPerson={false} setOrbitEnabled={setOrbitEnabled} /> {/* Third-person player */}
-    
-            <XRSetup />
-          </XR>
-        </Canvas>
-      </div>
+  return (
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      <Canvas style={{ width: '100%', height: '100%' }} shadows>
+        <ambientLight intensity={1.45} />
+                               {/* eslint-disable-next-line react/no-unknown-property */}
+ <directionalLight position={[2, 8, 22]} intensity={3} castShadow={true} />
 
-    );
-}
+        <Box args={[2, 5, 2]} position={[-1.2, 2, 0]}>
+          <meshLambertMaterial color={'red'} />
+        </Box>
+        <Spherecustom args={[2, 55, 42]} position={[1.2, 2, 0]} />
+        <RainbowSphere args={[20, 5, 42]} position={[20.2, 2, 0]} onCreated={(obj) => obj.layers.enable(BLOOM_LAYER)} />
+        <Plane args={[500, 500]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+          <meshLambertMaterial color={'green'} />
+        </Plane>
+<Tvs url={'./technical_difficulties (1).glb'}/>
+        <TorusKnot position={[50, 10, 0]} onCreated={(obj) => obj.layers.enable(BLOOM_LAYER)} />
+        <TorusKnot position={[50, 10, 0]} />
+<LeePerrySmithModel />
+        <SkyBox1 textureUrl={Sky1} />
+
+        <OrbitControls enablePan={true} enableZoom={true} enabled={orbitEnabled} />
+        <Player firstPerson={false} setOrbitEnabled={setOrbitEnabled} position={playerPosition} />
+
+        <PostProcessing />
+      </Canvas>
+    </div>
+  );
+};
 
 export default SeussWorld;

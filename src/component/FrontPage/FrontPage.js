@@ -166,7 +166,7 @@ const FrontPage = () => {
             style={{ fontFamily: 'SeussFont', fontSize: '20px' }}
             // disabled={!ownsNFT || loadingNFT}
           >
-            Enter SeussWorld
+            Enter PunkWorld
           </motion.button>
         </Link>
       </motion.main>

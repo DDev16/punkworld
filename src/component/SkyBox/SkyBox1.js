@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { TextureLoader, BackSide } from 'three';
 import { useLoader } from '@react-three/fiber';
+import PropTypes from 'prop-types';
+import { Sphere } from '@react-three/drei';
 
 const SkyBox = ({ textureUrl }) => {
   const texture = useLoader(TextureLoader, textureUrl);
@@ -13,11 +15,16 @@ const SkyBox = ({ textureUrl }) => {
   );
 
   return (
-    <mesh>
-      <sphereGeometry attach="geometry" args={[105, 30, 10]} />
-      <meshBasicMaterial attach="material" {...materialProps} />
-    </mesh>
+    <group>
+      <Sphere args={[505, 505, 505]}>
+        <meshBasicMaterial {...materialProps} />
+      </Sphere>
+    </group>
   );
+};
+
+SkyBox.propTypes = {
+  textureUrl: PropTypes.string.isRequired,
 };
 
 export default SkyBox;
