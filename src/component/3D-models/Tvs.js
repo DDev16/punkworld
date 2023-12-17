@@ -13,7 +13,7 @@ const ModelViewer = ({ url }) => {
   });
 
   return (
-    <group ref={modelRef} position={[30,0,30]}>
+    <group ref={modelRef} position={[30,-.6,30]}>
     {/* eslint-disable-next-line react/no-unknown-property */}  
     <primitive object={gltf.scene} dispose={null} />
     </group>
