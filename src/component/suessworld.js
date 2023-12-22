@@ -75,24 +75,41 @@ const SeussWorld = () => {
       <Canvas style={{ width: '100%', height: '100%' }} shadows>
         <ambientLight intensity={1.45} />
                                {/* eslint-disable-next-line react/no-unknown-property */}
- <directionalLight position={[2, 8, 22]} intensity={3} castShadow={true} />
+                               <directionalLight
+  position={[2, 8, 22]}
+  intensity={3}
+  /* eslint-disable */
+  castShadow={true}
+  shadow-mapSize-width={1024}
+  shadow-mapSize-height={1024}
+  /* eslint-enable */
+></directionalLight>
+<directionalLight
+  position={[80, 8, 22]}
+  intensity={3}
+  /* eslint-disable */
+  castShadow={true}
+  shadow-mapSize-width={4024}
+  shadow-mapSize-height={4024}
+  /* eslint-enable */
+></directionalLight>
 
-        <Box args={[2, 5, 2]} position={[-1.2, 2, 0]}>
+        <Box args={[2, 5, 2]} position={[-1.2, 2, 0]} castShadow receiveShadow>
           <meshLambertMaterial color={'red'} />
         </Box>
-        <Spherecustom args={[2, 55, 42]} position={[1.2, 2, 0]} />
-        <RainbowSphere args={[20, 5, 42]} position={[20.2, 2, 0]} onCreated={(obj) => obj.layers.enable(BLOOM_LAYER)} />
-        <Plane args={[500, 500]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <Spherecustom args={[2, 55, 42]}  castShadow receiveShadow/>
+        <RainbowSphere args={[20, 5, 42]}  castShadow receiveShadow/>
+        <Plane args={[500, 500]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} castShadow receiveShadow>
           <meshLambertMaterial color={'green'} />
         </Plane>
-<Tvs url={'./technical_difficulties (1).glb'}/>
-        <TorusKnot position={[50, 10, 0]} onCreated={(obj) => obj.layers.enable(BLOOM_LAYER)} />
-        <TorusKnot position={[50, 10, 0]} />
-<LeePerrySmithModel />
+<Tvs url={'./technical_difficulties (1).glb'} castShadow receiveShadow/>
+        <TorusKnot position={[50, 10, 0]} castShadow receiveShadow />
+        <TorusKnot position={[50, 10, 0]} castShadow receiveShadow />
+<LeePerrySmithModel castShadow receiveShadow/>
         <SkyBox1 textureUrl={Sky1} />
 
         <OrbitControls enablePan={true} enableZoom={true} enabled={orbitEnabled} />
-        <Player firstPerson={false} setOrbitEnabled={setOrbitEnabled} position={playerPosition} />
+        <Player firstPerson={false} setOrbitEnabled={setOrbitEnabled} position={playerPosition} castShadow receiveShadow />
 
         <PostProcessing />
       </Canvas>

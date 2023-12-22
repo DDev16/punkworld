@@ -25,7 +25,7 @@ const TorusKnot = (props) => {
 
   return (
     <mesh {...props} ref={meshRef}>
-<torusKnotGeometry args={[150, 30, 150, 16]} />
+<torusKnotGeometry args={[1, 30, 5, 16]} />
                {/* eslint-disable-next-line react/no-unknown-property */}
  <customShaderMaterial attach="material" />
     </mesh>
